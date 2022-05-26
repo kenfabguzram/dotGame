@@ -1,8 +1,6 @@
 package Client;
 import java.awt.event.*;
-import java.awt.BorderLayout;
 
-import javax.swing.JButton;
 import javax.swing.JFrame;
 
 import Common.Casilla;
@@ -17,7 +15,6 @@ import java.io.*;
 public class GUI implements ActionListener, Constantes{
 
     JFrame ventana;
-    JButton next;
     Mapa mapa;
     Target target;
 
@@ -34,23 +31,23 @@ public class GUI implements ActionListener, Constantes{
 
         ventana.add(mapa.panelTablero);
 
-        next = new JButton("continuar");
-        next.setActionCommand("next");
-
-        ventana.add(next, BorderLayout.SOUTH);
-
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventana.pack();
         ventana.setVisible(true);
-
+        dot=new Dot();
         target = new Target();
+        Server server = new Server(dot);
+        Thread hilo = new Thread(server);
+        hilo.start();
 
-
+        moveDot();
+        run();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        mapa.tablero[target.coords[X]][target.coords[Y]].clearTarget();
+        if(dot.currentPosition!=target.coords)
+            mapa.tablero[target.coords[X]][target.coords[Y]].clearTarget();
         ((Casilla)e.getSource()).setAsTarget();
         target.coords = ((Casilla)e.getSource()).getCoords();
 
@@ -73,8 +70,8 @@ public class GUI implements ActionListener, Constantes{
     }
 
     public void run(){
+        mapa.tablero[dot.currentPosition[X]][dot.currentPosition[Y]].setAsDot();
         while (true){
-            dot.move();
             moveDot();
             try {
                 Thread.sleep(1000);

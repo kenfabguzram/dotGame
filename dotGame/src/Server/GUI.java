@@ -1,22 +1,24 @@
 package Server;
-import java.awt.event.*;
-import java.awt.BorderLayout;
 
-import javax.swing.JButton;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+
 import javax.swing.JFrame;
 
-import Common.Casilla;
 import Common.Constantes;
 import Common.Dot;
 import Common.Mapa;
 
 public class GUI implements ActionListener, Constantes{
-
     JFrame ventana;
-    JButton next;
     Mapa mapa;
     Dot dot;
-    
+
+    Socket client;
+    ObjectOutputStream output;
+
     public GUI(){
 
         ventana = new JFrame();
@@ -25,11 +27,6 @@ public class GUI implements ActionListener, Constantes{
 
         ventana.add(mapa.panelTablero);
 
-        next = new JButton("continuar");
-        next.addActionListener(this);
-        next.setActionCommand("next");
-
-        ventana.add(next, BorderLayout.SOUTH);
 
         ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         ventana.pack();
@@ -58,6 +55,16 @@ public class GUI implements ActionListener, Constantes{
     public void run(){
         while (true){
             dot.move();
+            try {
+                client = new Socket("127.0.0.1", 4445);
+                output = new ObjectOutputStream(client.getOutputStream());
+                output.writeObject(dot);
+                output.flush();
+                output.close();
+                client.close();
+            } catch (Exception ex) {
+                //TODO: handle exception
+            }
             moveDot();
             try {
                 Thread.sleep(1000);
